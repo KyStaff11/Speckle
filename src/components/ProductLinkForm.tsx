@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductDetails } from "@/types/specification";
 import { buildUtmLink, slugify } from "@/lib/utm";
@@ -21,12 +22,14 @@ export default function ProductLinkForm() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [referralCode, setReferralCode] = useState("");
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [accountChecked, setAccountChecked] = useState(false);
 
   useEffect(() => {
     // localStorage is only available client-side, so this loads post-mount.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setReferralCode(getAccount().referralCode);
+    setReferralCode(getAccount()?.referralCode ?? null);
+    setAccountChecked(true);
   }, []);
 
   const utmLink = useMemo(() => {
@@ -114,47 +117,59 @@ export default function ProductLinkForm() {
         every purchase made through it is attributed back to you.
       </p>
 
-      <div className="mt-8 space-y-2">
-        <label htmlFor="project-name" className="text-sm font-medium">
-          Project name
-        </label>
-        <input
-          id="project-name"
-          type="text"
-          value={projectName}
-          onChange={(e) => setProjectName(e.target.value)}
-          placeholder="e.g. Maple Ave Kitchen Remodel"
-          className="w-full border border-border px-3 py-2.5 text-sm text-accent outline-none focus:border-accent"
-        />
-      </div>
-
-      <div className="mt-6 space-y-2">
-        <label htmlFor="product-link" className="text-sm font-medium">
-          Affiliate product link
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="product-link"
-            type="url"
-            value={linkInput}
-            onChange={(e) => setLinkInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleFetch()}
-            placeholder="https://distributor.com/product/..."
-            className="flex-1 border border-border px-3 py-2.5 text-sm text-accent outline-none focus:border-accent"
-          />
-          <button
-            type="button"
-            onClick={handleFetch}
-            disabled={status === "loading" || !linkInput.trim()}
-            className="shrink-0 border border-accent bg-accent px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {status === "loading" ? "Fetching…" : "Fetch details"}
-          </button>
+      {accountChecked && !referralCode ? (
+        <div className="mt-8 border border-border bg-[#fafafa] p-6 text-sm text-muted">
+          You need a Speckle account before you can generate an attributed link.{" "}
+          <Link href="/account" className="font-medium text-accent underline">
+            Create your account
+          </Link>{" "}
+          to get started.
         </div>
-        {status === "error" && error && <p className="text-sm text-[#c0392b]">{error}</p>}
-      </div>
+      ) : (
+        <>
+          <div className="mt-8 space-y-2">
+            <label htmlFor="project-name" className="text-sm font-medium">
+              Project name
+            </label>
+            <input
+              id="project-name"
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="e.g. Maple Ave Kitchen Remodel"
+              className="w-full border border-border px-3 py-2.5 text-sm text-accent outline-none focus:border-accent"
+            />
+          </div>
 
-      {hasProduct && (
+          <div className="mt-6 space-y-2">
+            <label htmlFor="product-link" className="text-sm font-medium">
+              Affiliate product link
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="product-link"
+                type="url"
+                value={linkInput}
+                onChange={(e) => setLinkInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleFetch()}
+                placeholder="https://distributor.com/product/..."
+                className="flex-1 border border-border px-3 py-2.5 text-sm text-accent outline-none focus:border-accent"
+              />
+              <button
+                type="button"
+                onClick={handleFetch}
+                disabled={status === "loading" || !linkInput.trim()}
+                className="shrink-0 border border-accent bg-accent px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {status === "loading" ? "Fetching…" : "Fetch details"}
+              </button>
+            </div>
+            {status === "error" && error && <p className="text-sm text-[#c0392b]">{error}</p>}
+          </div>
+        </>
+      )}
+
+      {hasProduct && referralCode && (
         <div className="mt-10 border border-border">
           <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-[160px_1fr]">
             <div className="aspect-square w-full overflow-hidden border border-border bg-[#fafafa]">
