@@ -14,13 +14,3 @@ export type Specification = {
   isFavourite: boolean;
   createdAt: string;
 };
-
-export type DesignerAccount = {
-  firstName: string;
-  lastName: string;
-  companyName: string;
-  email: string;
-  phone: string;
-  address: string;
-  referralCode: string;
-};

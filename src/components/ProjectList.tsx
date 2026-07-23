@@ -3,19 +3,22 @@
 import { useEffect, useState } from "react";
 import type { Specification } from "@/types/specification";
 import { deleteSpecification, getSpecifications, toggleFavourite } from "@/lib/storage";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ProjectList({ favouritesOnly = false }: { favouritesOnly?: boolean }) {
+  const { user } = useAuth();
   const [specs, setSpecs] = useState<Specification[] | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user) return;
     // localStorage is only available client-side, so specs load post-mount.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSpecs(getSpecifications());
-  }, []);
+    setSpecs(getSpecifications(user.email));
+  }, [user]);
 
   function refresh() {
-    setSpecs(getSpecifications());
+    if (user) setSpecs(getSpecifications(user.email));
   }
 
   async function handleCopy(spec: Specification) {
@@ -64,7 +67,8 @@ export default function ProjectList({ favouritesOnly = false }: { favouritesOnly
               <button
                 type="button"
                 onClick={() => {
-                  toggleFavourite(spec.id);
+                  if (!user) return;
+                  toggleFavourite(user.email, spec.id);
                   refresh();
                 }}
                 aria-label={spec.isFavourite ? "Remove from favourites" : "Add to favourites"}
@@ -94,7 +98,8 @@ export default function ProjectList({ favouritesOnly = false }: { favouritesOnly
               <button
                 type="button"
                 onClick={() => {
-                  deleteSpecification(spec.id);
+                  if (!user) return;
+                  deleteSpecification(user.email, spec.id);
                   refresh();
                 }}
                 className="shrink-0 border border-border px-3 py-1.5 text-xs font-medium text-muted-soft hover:border-[#c0392b] hover:text-[#c0392b]"
