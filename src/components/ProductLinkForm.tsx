@@ -114,12 +114,23 @@ export default function ProductLinkForm() {
 
       {!referralCode ? (
         <div className="mt-8 border border-border bg-[#fafafa] p-6 text-sm text-muted">
-          Specification links are created by designer accounts. You&apos;re logged in as a
-          distributor, so this page isn&apos;t available —{" "}
-          <Link href="/account" className="font-medium text-accent underline">
-            view your account
-          </Link>{" "}
-          instead.
+          {!user ? (
+            <>
+              You need to log in as a designer to start a specification.{" "}
+              <Link href="/login" className="font-medium text-accent underline">
+                Log in
+              </Link>
+            </>
+          ) : (
+            <>
+              Specification links are created by designer accounts. You&apos;re logged in as a
+              distributor, so this page isn&apos;t available —{" "}
+              <Link href="/account" className="font-medium text-accent underline">
+                view your account
+              </Link>{" "}
+              instead.
+            </>
+          )}
         </div>
       ) : (
         <>

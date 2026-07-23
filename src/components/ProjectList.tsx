@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Specification } from "@/types/specification";
 import { deleteSpecification, getSpecifications, toggleFavourite } from "@/lib/storage";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ProjectList({ favouritesOnly = false }: { favouritesOnly?: boolean }) {
-  const { user } = useAuth();
+  const { user, status } = useAuth();
   const [specs, setSpecs] = useState<Specification[] | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -25,6 +26,20 @@ export default function ProjectList({ favouritesOnly = false }: { favouritesOnly
     await navigator.clipboard.writeText(spec.utmLink);
     setCopiedId(spec.id);
     setTimeout(() => setCopiedId((id) => (id === spec.id ? null : id)), 2000);
+  }
+
+  if (status === "loading") return null;
+
+  if (!user) {
+    return (
+      <p className="text-sm text-muted">
+        You need to{" "}
+        <Link href="/login" className="font-medium text-accent underline">
+          log in
+        </Link>{" "}
+        to see this.
+      </p>
+    );
   }
 
   if (specs === null) return null;

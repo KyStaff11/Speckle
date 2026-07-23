@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { AddressFields, Field } from "@/components/FormField";
@@ -8,8 +9,20 @@ import type { Address, DesignerProfile, DistributorProfile, UserProfile } from "
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AccountForm() {
-  const { user, updateProfile } = useAuth();
-  if (!user) return null;
+  const { user, status, updateProfile } = useAuth();
+
+  if (status === "loading") return null;
+
+  if (!user) {
+    return (
+      <div className="mt-8 max-w-md border border-border bg-[#fafafa] p-6 text-sm text-muted">
+        You need to log in to view your account.{" "}
+        <Link href="/login" className="font-medium text-accent underline">
+          Log in
+        </Link>
+      </div>
+    );
+  }
 
   return user.role === "designer" ? (
     <DesignerAccountForm user={user} onSave={updateProfile} />
