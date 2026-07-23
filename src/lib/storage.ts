@@ -16,22 +16,19 @@ function randomCode(length = 6): string {
   return code;
 }
 
-export function getAccount(): DesignerAccount {
-  if (!isBrowser()) {
-    return { name: "", email: "", referralCode: "" };
-  }
-
+/** Returns null if the designer hasn't created a Speckle account yet. */
+export function getAccount(): DesignerAccount | null {
+  if (!isBrowser()) return null;
   const raw = window.localStorage.getItem(ACCOUNT_KEY);
-  if (raw) {
-    return JSON.parse(raw) as DesignerAccount;
-  }
+  return raw ? (JSON.parse(raw) as DesignerAccount) : null;
+}
 
-  const account: DesignerAccount = {
-    name: "",
-    email: "",
-    referralCode: `DSGN-${randomCode()}`,
-  };
-  window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+/** Creates the account and assigns its permanent referral code. */
+export function createAccount(details: Omit<DesignerAccount, "referralCode">): DesignerAccount {
+  const account: DesignerAccount = { ...details, referralCode: `DSGN-${randomCode()}` };
+  if (isBrowser()) {
+    window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+  }
   return account;
 }
 

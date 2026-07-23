@@ -16,7 +16,11 @@ export type Specification = {
 };
 
 export type DesignerAccount = {
-  name: string;
+  firstName: string;
+  lastName: string;
+  companyName: string;
   email: string;
+  phone: string;
+  address: string;
   referralCode: string;
 };
