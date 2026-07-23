@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { AuthError } from "@/lib/auth";
@@ -17,10 +17,6 @@ export default function LoginScreen() {
   return (
     <div className="flex flex-1 items-center justify-center px-6 py-16">
       <div className="w-full max-w-md">
-        <div className="mb-10 flex justify-center">
-          <Image src="/logo.svg" alt="Speckle" width={160} height={38} priority />
-        </div>
-
         {mode === "login" ? (
           <>
             <h1 className="text-center text-xl font-semibold text-accent">Log in to Speckle</h1>
@@ -114,6 +110,7 @@ export default function LoginScreen() {
 }
 
 function LoginForm() {
+  const router = useRouter();
   const { logIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -126,6 +123,7 @@ function LoginForm() {
     setSubmitting(true);
     try {
       await logIn(email, password);
+      router.push("/account");
     } catch (err) {
       setError(err instanceof AuthError ? err.message : "Something went wrong. Try again.");
     } finally {
@@ -150,6 +148,7 @@ function LoginForm() {
 }
 
 function SignUpForm({ role }: { role: UserRole }) {
+  const router = useRouter();
   const { signUp } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -199,6 +198,7 @@ function SignUpForm({ role }: { role: UserRole }) {
               address,
             };
       await signUp(input, password);
+      router.push("/account");
     } catch (err) {
       setSubmitError(err instanceof AuthError ? err.message : "Something went wrong. Try again.");
     } finally {

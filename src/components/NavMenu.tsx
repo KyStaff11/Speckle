@@ -8,11 +8,10 @@ const MENU_ITEMS = [
   { label: "Start a new specification", href: "/specify" },
   { label: "My Projects", href: "/projects" },
   { label: "Favourites", href: "/favourites" },
-  { label: "My account", href: "/account" },
 ];
 
 export default function NavMenu() {
-  const { user, logOut } = useAuth();
+  const { user, status, logOut } = useAuth();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +32,7 @@ export default function NavMenu() {
     };
   }, []);
 
+  const isAuthenticated = status === "authenticated";
   const identity = user
     ? user.role === "designer"
       ? `${user.firstName} ${user.lastName}`
@@ -77,17 +77,40 @@ export default function NavMenu() {
               {item.label}
             </Link>
           ))}
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              logOut();
-            }}
-            className="block w-full px-4 py-3 text-left text-sm text-muted hover:bg-[#fafafa] hover:text-accent"
-          >
-            Log out
-          </button>
+
+          {isAuthenticated && (
+            <Link
+              href="/account"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="block border-b border-border px-4 py-3 text-sm text-muted hover:bg-[#fafafa] hover:text-accent"
+            >
+              My account
+            </Link>
+          )}
+
+          {isAuthenticated ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                logOut();
+              }}
+              className="block w-full px-4 py-3 text-left text-sm text-muted hover:bg-[#fafafa] hover:text-accent"
+            >
+              Log out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-3 text-sm font-medium text-accent hover:bg-[#fafafa]"
+            >
+              Log in
+            </Link>
+          )}
         </div>
       )}
     </div>
