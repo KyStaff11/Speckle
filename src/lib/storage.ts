@@ -1,67 +1,38 @@
-import type { DesignerAccount, Specification } from "@/types/specification";
-
-const ACCOUNT_KEY = "speckle:account";
-const SPECS_KEY = "speckle:specifications";
+import type { Specification } from "@/types/specification";
 
 function isBrowser() {
   return typeof window !== "undefined";
 }
 
-function randomCode(length = 6): string {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < length; i++) {
-    code += alphabet[Math.floor(Math.random() * alphabet.length)];
-  }
-  return code;
+function specsKey(email: string): string {
+  return `speckle:specifications:${email.trim().toLowerCase()}`;
 }
 
-/** Returns null if the designer hasn't created a Speckle account yet. */
-export function getAccount(): DesignerAccount | null {
-  if (!isBrowser()) return null;
-  const raw = window.localStorage.getItem(ACCOUNT_KEY);
-  return raw ? (JSON.parse(raw) as DesignerAccount) : null;
-}
-
-/** Creates the account and assigns its permanent referral code. */
-export function createAccount(details: Omit<DesignerAccount, "referralCode">): DesignerAccount {
-  const account: DesignerAccount = { ...details, referralCode: `DSGN-${randomCode()}` };
-  if (isBrowser()) {
-    window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
-  }
-  return account;
-}
-
-export function saveAccount(account: DesignerAccount): void {
-  if (!isBrowser()) return;
-  window.localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
-}
-
-export function getSpecifications(): Specification[] {
+export function getSpecifications(email: string): Specification[] {
   if (!isBrowser()) return [];
-  const raw = window.localStorage.getItem(SPECS_KEY);
+  const raw = window.localStorage.getItem(specsKey(email));
   return raw ? (JSON.parse(raw) as Specification[]) : [];
 }
 
-export function saveSpecification(spec: Specification): void {
+export function saveSpecification(email: string, spec: Specification): void {
   if (!isBrowser()) return;
-  const specs = getSpecifications();
+  const specs = getSpecifications(email);
   window.localStorage.setItem(
-    SPECS_KEY,
+    specsKey(email),
     JSON.stringify([spec, ...specs.filter((s) => s.id !== spec.id)])
   );
 }
 
-export function toggleFavourite(id: string): void {
+export function toggleFavourite(email: string, id: string): void {
   if (!isBrowser()) return;
-  const specs = getSpecifications().map((s) =>
+  const specs = getSpecifications(email).map((s) =>
     s.id === id ? { ...s, isFavourite: !s.isFavourite } : s
   );
-  window.localStorage.setItem(SPECS_KEY, JSON.stringify(specs));
+  window.localStorage.setItem(specsKey(email), JSON.stringify(specs));
 }
 
-export function deleteSpecification(id: string): void {
+export function deleteSpecification(email: string, id: string): void {
   if (!isBrowser()) return;
-  const specs = getSpecifications().filter((s) => s.id !== id);
-  window.localStorage.setItem(SPECS_KEY, JSON.stringify(specs));
+  const specs = getSpecifications(email).filter((s) => s.id !== id);
+  window.localStorage.setItem(specsKey(email), JSON.stringify(specs));
 }

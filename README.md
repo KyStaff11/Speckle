@@ -17,17 +17,36 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## What's here
 
-- **Start a new specification** (`/specify`) — paste a product URL, fetch
-  its Open Graph metadata via `POST /api/fetch-product`, edit the pulled
-  fields, and generate a UTM link (`utm_source=speckle`, `utm_medium=affiliate`,
-  `utm_campaign=<project slug>`, `utm_content=<referral code>`).
-- **My Projects** (`/projects`) — saved specifications and their links.
+- **Log in / sign up** — the entire app sits behind an auth wall. New users
+  pick **Designer** or **Distributor** and fill out the matching sign-up
+  form; returning users log in with email + password.
+- **Start a new specification** (`/specify`, designers only) — paste a
+  product URL, fetch its Open Graph metadata via `POST /api/fetch-product`,
+  edit the pulled fields, and generate a UTM link (`utm_source=speckle`,
+  `utm_medium=affiliate`, `utm_campaign=<project slug>`,
+  `utm_content=<referral code>`).
+- **My Projects** (`/projects`) — saved specifications and their links,
+  scoped to the signed-in designer.
 - **Favourites** (`/favourites`) — starred specifications.
-- **My account** (`/account`) — designer name, email, and referral code
-  embedded in every generated link.
+- **My account** (`/account`) — edit your profile; designers see their
+  referral code.
 
-Accounts and saved specifications are currently persisted to
-`localStorage` — there's no backend/auth yet, so data is per-browser only.
+## Accounts
+
+- **Designers** sign up with first name, last name, company name, address
+  (street / province / country / postal code), email, and a password.
+- **Distributors** sign up with company name, primary contact name, email,
+  address, and a password.
+- Referral codes are generated once at sign-up for designers and used to
+  attribute UTM links back to them.
+
+Users and saved specifications are currently persisted to `localStorage` —
+there's no real backend yet. Passwords are hashed (SHA-256 + per-user salt)
+before being stored, but this is still a client-only simulation: anyone
+with access to the browser's dev tools can read the local user store. This
+is fine for prototyping, but **do not treat this as production-grade
+authentication** — a real backend with server-side auth is needed before
+launch.
 
 ## Stack
 

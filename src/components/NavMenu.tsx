@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const MENU_ITEMS = [
   { label: "Start a new specification", href: "/specify" },
@@ -11,6 +12,7 @@ const MENU_ITEMS = [
 ];
 
 export default function NavMenu() {
+  const { user, logOut } = useAuth();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -31,8 +33,15 @@ export default function NavMenu() {
     };
   }, []);
 
+  const identity = user
+    ? user.role === "designer"
+      ? `${user.firstName} ${user.lastName}`
+      : user.companyName
+    : "";
+
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative flex items-center gap-3">
+      {identity && <span className="hidden text-sm text-muted sm:inline">{identity}</span>}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -63,11 +72,22 @@ export default function NavMenu() {
               href={item.href}
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="block border-b border-border px-4 py-3 text-sm text-muted last:border-b-0 hover:bg-[#fafafa] hover:text-accent"
+              className="block border-b border-border px-4 py-3 text-sm text-muted hover:bg-[#fafafa] hover:text-accent"
             >
               {item.label}
             </Link>
           ))}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              logOut();
+            }}
+            className="block w-full px-4 py-3 text-left text-sm text-muted hover:bg-[#fafafa] hover:text-accent"
+          >
+            Log out
+          </button>
         </div>
       )}
     </div>

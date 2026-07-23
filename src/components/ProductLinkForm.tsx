@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { ProductDetails } from "@/types/specification";
 import { buildUtmLink, slugify } from "@/lib/utm";
-import { getAccount, saveSpecification } from "@/lib/storage";
+import { saveSpecification } from "@/lib/storage";
+import { useAuth } from "@/context/AuthContext";
 
 const EMPTY_PRODUCT: ProductDetails = {
   sourceUrl: "",
@@ -15,6 +16,7 @@ const EMPTY_PRODUCT: ProductDetails = {
 };
 
 export default function ProductLinkForm() {
+  const { user } = useAuth();
   const [projectName, setProjectName] = useState("");
   const [linkInput, setLinkInput] = useState("");
   const [product, setProduct] = useState<ProductDetails>(EMPTY_PRODUCT);
@@ -22,15 +24,8 @@ export default function ProductLinkForm() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
-  const [accountChecked, setAccountChecked] = useState(false);
 
-  useEffect(() => {
-    // localStorage is only available client-side, so this loads post-mount.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setReferralCode(getAccount()?.referralCode ?? null);
-    setAccountChecked(true);
-  }, []);
+  const referralCode = user?.role === "designer" ? user.referralCode : null;
 
   const utmLink = useMemo(() => {
     if (!product.sourceUrl || !referralCode) return "";
@@ -94,8 +89,8 @@ export default function ProductLinkForm() {
   }
 
   function handleSave() {
-    if (!utmLink || !product.sourceUrl) return;
-    saveSpecification({
+    if (!utmLink || !product.sourceUrl || !user) return;
+    saveSpecification(user.email, {
       id: crypto.randomUUID(),
       projectName: projectName || product.productName || "Untitled specification",
       product,
@@ -117,13 +112,14 @@ export default function ProductLinkForm() {
         every purchase made through it is attributed back to you.
       </p>
 
-      {accountChecked && !referralCode ? (
+      {!referralCode ? (
         <div className="mt-8 border border-border bg-[#fafafa] p-6 text-sm text-muted">
-          You need a Speckle account before you can generate an attributed link.{" "}
+          Specification links are created by designer accounts. You&apos;re logged in as a
+          distributor, so this page isn&apos;t available —{" "}
           <Link href="/account" className="font-medium text-accent underline">
-            Create your account
+            view your account
           </Link>{" "}
-          to get started.
+          instead.
         </div>
       ) : (
         <>
